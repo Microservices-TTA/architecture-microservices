@@ -1,0 +1,53 @@
+services:
+  orders-db:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - './..data/orders-.data:/.data/db'
+    networks:
+      - msrvs
+
+#  orders-service:
+#    build:
+#      context: orders-service
+#      dockerfile: Dockerfile
+#    environment:
+#      MONGODB_USERNAME: root
+#      MONGODB_PASSWORD: example
+#      MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  auth-db:
+    image: postgres:10-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - './..data/auth-.data:/var/lib/postgresql/.data'
+    environment:
+      POSTGRES_USER: auth
+      POSTGRES_PASSWORD: my-custom-secret
+      POSTGRES_DB: auth-db
+
+  auth-admin:
+    image: adminer
+    restart: always
+    depends_on:
+      - auth-db
+    ports:
+      - 8080:8080
+
+#  auth-service:
+#    build:
+#      context: auth-service
+#      dockerfile: Dockerfile
+#    environment:
+#      PG_HOST: postgresdb
+#      PG_USER: auth
+#      PG_PASSWORD: my-custom-secret
+#      PG_PORT: 5432
+
+networks:
+  msrvs:
+    driver: bridge
