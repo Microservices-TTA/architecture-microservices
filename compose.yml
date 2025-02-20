@@ -6,18 +6,18 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - './..data/orders-.data:/.data/db'
+      - "./..data/orders-.data:/.data/db"
     networks:
       - msrvs
 
-#  orders-service:
-#    build:
-#      context: orders-service
-#      dockerfile: Dockerfile
-#    environment:
-#      MONGODB_USERNAME: root
-#      MONGODB_PASSWORD: example
-#      MONGODB_URL: mongodb://root:example@mongo:27017/
+  #  orders-service:
+  #    build:
+  #      context: orders-service
+  #      dockerfile: Dockerfile
+  #    environment:
+  #      MONGODB_USERNAME: root
+  #      MONGODB_PASSWORD: example
+  #      MONGODB_URL: mongodb://root:example@mongo:27017/
 
   auth-db:
     image: postgres:10-alpine
@@ -38,15 +38,16 @@ services:
     ports:
       - 8080:8080
 
-#  auth-service:
-#    build:
-#      context: auth-service
-#      dockerfile: Dockerfile
-#    environment:
-#      PG_HOST: postgresdb
-#      PG_USER: auth
-#      PG_PASSWORD: my-custom-secret
-#      PG_PORT: 5432
+  auth-service:
+    depends_on:
+      - auth-db
+    ports:
+      - 3000:3000
+    build:
+      context: auth-service
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgres://auth:my-custom-secret@auth-db:5432/auth-db?schema=public"
 
 networks:
   msrvs:
