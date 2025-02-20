@@ -6,7 +6,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - "./..data/orders-.data:/.data/db"
+      - "./.data/orders-.data:/.data/db"
     networks:
       - msrvs
 
@@ -24,7 +24,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - './..data/auth-.data:/var/lib/postgresql/.data'
+      - './.data/auth-data:/var/lib/postgresql/data'
     environment:
       POSTGRES_USER: auth
       POSTGRES_PASSWORD: my-custom-secret
