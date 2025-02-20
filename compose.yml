@@ -6,18 +6,34 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - "./.data/orders-.data:/.data/db"
+      - './.data/orders-data:/data/db'
     networks:
       - msrvs
 
-  #  orders-service:
-  #    build:
-  #      context: orders-service
-  #      dockerfile: Dockerfile
-  #    environment:
-  #      MONGODB_USERNAME: root
-  #      MONGODB_PASSWORD: example
-  #      MONGODB_URL: mongodb://root:example@mongo:27017/
+#  orders-service:
+#    build:
+#      context: orders-service
+#      dockerfile: Dockerfile
+#    environment:
+#      MONGODB_USERNAME: root
+#      MONGODB_PASSWORD: example
+#      MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  gateway-service:
+    depends_on:
+      - message-broker
+    build:
+      context: gateway-service
+      dockerfile: Dockerfile
+    volumes:
+      - './gateway-service:/app'
+    environment:
+      PORT: 3000
+      ORDER_SERVICE_URL: http://orders-service:3000
+      AUTH_SERVICE_URL: http://auth-service:3000
+      AMQP_URL: amqp://RMQ_USER:RMQ_PASS@message-broker:5672
+    ports:
+      - "3000:3000"
 
   auth-db:
     image: postgres:10-alpine
@@ -35,8 +51,24 @@ services:
     restart: always
     depends_on:
       - auth-db
+      - orders-db
     ports:
-      - 8080:8080
+      - "8080:8080"
+
+  message-broker:
+    depends_on:
+      - auth-db
+      - orders-db
+    image: rabbitmq:3-alpine
+    restart: always
+    hostname: message-broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: RMQ_USER
+      RABBITMQ_DEFAULT_PASS: RMQ_PASS
+
 
   auth-service:
     depends_on:
