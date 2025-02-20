@@ -32,7 +32,7 @@ services:
     environment:
       PORT: 3000
       ORDER_SERVICE_URL: http://orders-service:3000
-      AUTH_SERVICE_URL: http://auth-service:3000
+      AUTH_SERVICE_URL: http://auth-service:3003
       AMQP_URL: amqp://RMQ_USER:RMQ_PASS@message-broker:5672
     ports:
       - "3000:3000"
@@ -81,7 +81,7 @@ services:
     depends_on:
       - auth-db
     ports:
-      - "3001:3000"
+      - "3003:3003"
     build:
       context: auth-service
       dockerfile: Dockerfile

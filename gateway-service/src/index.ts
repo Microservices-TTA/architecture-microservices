@@ -4,11 +4,12 @@ import OrdersRouter from "./services/orders/orders.routes";
 import bodyParser from "body-parser";
 import {AMQPService, AMQPServiceAsync} from "./lib/message-broker/MessageBrokerService";
 import amqp from "amqplib/callback_api.js";
+import AuthRouter from "./services/auth/auth.routes";
 
 // configures dotenv to work in your application
 dotenv.config();
 const app = express();
-app.use(bodyParser.json({limit: '50mb'}))
+app.use(express.json())
 
 
 const PORT = process.env.PORT;
@@ -18,6 +19,8 @@ app.get("/", (request: Request, response: Response) => {
 });
 
 app.use("/orders", OrdersRouter);
+
+app.use("/auth", AuthRouter)
 
 const AMQPServicePromises = new AMQPServiceAsync();
 

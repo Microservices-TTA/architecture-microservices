@@ -3,19 +3,20 @@ import {createSession, generateSessionToken, invalidateAllSessions, validateSess
 import {PrismaClient, User} from "@prisma/client";
 
 const app = express()
-const port = 3000
+const port = 3003
 
 app.use(express.json());
 const prisma = new PrismaClient();
 
 app.post('/signup', async (req, res) => {
+    const {name} = req.body;
 
-    if(!req.body.name) {
-        res.status(400).send('Name is required')
+    if (!name) {
+        res.status(400).json({error: 'Name is required'})
         return;
     }
 
-    const user : User = await prisma.user.create({
+    const user: User = await prisma.user.create({
         data: {
             name: req.body.name,
         }
@@ -25,43 +26,43 @@ app.post('/signup', async (req, res) => {
 })
 
 app.post('/signin', async (req, res) => {
-    if(!req.body.name) {
+    if (!req.body.name) {
         res.status(400).send('Name is required')
         return;
     }
 
-    const user : User | null = await prisma.user.findUnique({
+    const user: User | null = await prisma.user.findUnique({
         where: {
             name: req.body.name
         }
     });
 
-    if(user === null) {
+    if (user === null) {
         res.status(404).send('User not found')
         return;
     }
     const token = generateSessionToken();
     const session = await createSession(token, user.id);
-    if(session === null) {
+    if (session === null) {
         res.status(500).send('Session creation failed')
         return;
     }
-    res.send(token);
+    res.status(200).json({token});
 })
 
 app.post('/signout', async (req, res) => {
-    if(!req.body.name) {
+    if (!req.body.name) {
         res.status(400).send('Name is required')
         return;
     }
 
-    const user : User | null = await prisma.user.findUnique({
+    const user: User | null = await prisma.user.findUnique({
         where: {
             name: req.body.name
         }
     });
 
-    if(user === null) {
+    if (user === null) {
         res.status(404).send('User not found')
         return;
     }
@@ -72,7 +73,7 @@ app.post('/signout', async (req, res) => {
 })
 
 app.post('/verify', async (req, res) => {
-    if(!req.headers.authorization) {
+    if (!req.headers.authorization) {
         res.status(401).send('Authorization header is required')
         return;
     }
@@ -80,10 +81,9 @@ app.post('/verify', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
 
 
-
     const result = await validateSessionToken(token);
 
-    if(result.session === null) {
+    if (result.session === null) {
         res.status(401).send('Invalid token')
         return;
     }
@@ -93,7 +93,7 @@ app.post('/verify', async (req, res) => {
 
 
 app.get('/me', async (req, res) => {
-    if(!req.headers.authorization) {
+    if (!req.headers.authorization) {
         res.status(401).send('Authorization header is required')
         return;
     }
@@ -102,14 +102,13 @@ app.get('/me', async (req, res) => {
 
 
     const result = await validateSessionToken(token);
-    if(result.session === null) {
+    if (result.session === null) {
         res.status(401).send('Invalid token')
         return;
     }
 
-    res.send(result.user);
+    res.status(200).json({user: result.user});
 })
-
 
 
 app.listen(port, () => {

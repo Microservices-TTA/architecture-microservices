@@ -20,7 +20,7 @@ RUN npm run build
 
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 3003
 
 # Command to run the application
 CMD ["sh", "-c", "sleep 5 && npx prisma migrate deploy && npm run start"]
