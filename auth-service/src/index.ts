@@ -91,10 +91,6 @@ app.post('/verify', async (req, res) => {
     res.status(201).send('success');
 })
 
-app.get('/refresh', async (req, res) => {
-    console.log('Request received')
-    res.send('Refresh')
-})
 
 app.get('/me', async (req, res) => {
     if(!req.headers.authorization) {
