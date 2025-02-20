@@ -1,2 +1,7 @@
 .idea
 .data
+
+# Order service
+orders-service/node_modules
+orders-service/package-lock.json
+orders-service/.env
