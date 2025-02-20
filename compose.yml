@@ -1,13 +1,12 @@
 services:
-
-#  orders-service:
-#    build:
-#      context: orders-service
-#      dockerfile: Dockerfile
-#    environment:
-#      MONGODB_USERNAME: root
-#      MONGODB_PASSWORD: example
-#      MONGODB_URL: mongodb://root:example@mongo:27017/
+  #  orders-service:
+  #    build:
+  #      context: orders-service
+  #      dockerfile: Dockerfile
+  #    environment:
+  #      MONGODB_USERNAME: root
+  #      MONGODB_PASSWORD: example
+  #      MONGODB_URL: mongodb://root:example@mongo:27017/
 
   # auth-db:
   #   image: postgres:10-alpine
@@ -29,16 +28,19 @@ services:
   #     - 8080:8080
 
   orders-service:
-      build:
-        context: orders-service
-        dockerfile: Dockerfile
-      volumes:
-        - './orders-service:/app'
-      environment:
-        - PORT = 3000
-        - ATLAS_URI = mongodb://orders-db:27017/orders-db
-      ports:
-        - "3000:3000"
+    build:
+      context: orders-service
+      dockerfile: Dockerfile
+    depends_on:
+      - orders-db
+    volumes:
+      - "./orders-service:/app"
+    environment:
+      - PORT = 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - msrvs
 
   orders-db:
     image: mongo
@@ -47,7 +49,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pass
     volumes:
-      - './..data/orders-.data:/.data/db'
+      - "./..data/orders-.data:/.data/db"
     networks:
       - msrvs
 
@@ -60,8 +62,6 @@ services:
 #      PG_USER: auth
 #      PG_PASSWORD: my-custom-secret
 #      PG_PORT: 5432
-
-
 
 networks:
   msrvs:
