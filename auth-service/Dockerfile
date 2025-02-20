@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the TypeScript code
-RUN npx tsc
+RUN npm run build
 
 RUN npx prisma generate
 
