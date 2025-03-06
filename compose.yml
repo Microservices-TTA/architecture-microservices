@@ -50,6 +50,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: pass
     volumes:
       - "./..data/orders-.data:/.data/db"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     networks:
       - msrvs
 

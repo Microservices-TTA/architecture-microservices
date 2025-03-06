@@ -7,7 +7,7 @@ const port: number = 3000;
 
 app.use(express.json());
 
-const mongoURI = "mongodb://root:pass@orders-db:27017/orders-db?authSource=admin"; // Update with your MongoDB URI
+const mongoURI = "mongodb://root:pass@orders-db/orders-db?authSource=admin"; // Update with your MongoDB URI
 mongoose.connect(mongoURI);
 
 app.get("/", (req: Request, res: Response) => {
