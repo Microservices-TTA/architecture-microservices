@@ -3,7 +3,7 @@ import {createSession, generateSessionToken, invalidateAllSessions, validateSess
 import {PrismaClient, User} from "@prisma/client";
 
 const app = express()
-const port = 3003
+const port = 3000
 
 app.use(express.json());
 const prisma = new PrismaClient();

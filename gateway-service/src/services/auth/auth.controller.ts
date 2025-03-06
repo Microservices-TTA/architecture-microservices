@@ -5,8 +5,6 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL;
 export const signUpController: RequestHandler = async (req, res) => {
     const {name} = req.body
 
-    console.log(name)
-
     const result = await fetch(`${AUTH_SERVICE_URL}/signup`, {
         method: "POST",
         headers: {
@@ -77,6 +75,7 @@ export const verifyController: RequestHandler = async (req, res) => {
 
     if (result.status === 401) {
         res.status(401).send("Unauthorized");
+        return;
     }
 
     res.status(201).send("User is logged in")
@@ -91,6 +90,7 @@ export const meController: RequestHandler = async (req, res) => {
 
     if (result.status === 401) {
         res.status(401).send("Unauthorized");
+        return;
     }
 
     const json = await result.json()

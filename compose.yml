@@ -3,8 +3,8 @@ services:
     image: mongo
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: ${ORDERS_MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${ORDERS_MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - './.data/orders-data:/data/db'
     networks:
@@ -30,12 +30,14 @@ services:
 #    volumes:
 #      - './gateway-service:/app'
     environment:
-      PORT: 3000
-      ORDER_SERVICE_URL: http://orders-service:3000
-      AUTH_SERVICE_URL: http://auth-service:3003
-      AMQP_URL: amqp://RMQ_USER:RMQ_PASS@message-broker:5672
+      - PORT=${GATEWAY_SERVICE_PORT}
+      - ORDER_SERVICE_URL=http://orders-service:3000
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - AMQP_URL=amqp://${RABBIT_MQ_DEFAULT_USER}:${RABBIT_MQ_DEFAULT_PASS}@message-broker:${RABBIT_MQ_PORT}
     ports:
-      - "3000:3000"
+      - "3000:${GATEWAY_SERVICE_PORT}"
+    networks:
+      - msrvs
 
   auth-db:
     image: postgres:10-alpine
@@ -44,18 +46,19 @@ services:
     volumes:
       - './.data/auth-data:/var/lib/postgresql/data'
     environment:
-      POSTGRES_USER: auth
-      POSTGRES_PASSWORD: my-custom-secret
-      POSTGRES_DB: auth-db
+      - POSTGRES_USER=${AUTH_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${AUTH_POSTGRES_DB}
+    networks:
+      - msrvs
 
   auth-admin:
     image: adminer
     restart: always
-    depends_on:
-      - auth-db
-      - orders-db
     ports:
-      - "8080:8080"
+      - "8888:8080"
+    networks:
+      - msrvs
 
   message-broker:
     depends_on:
@@ -68,25 +71,30 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: RMQ_USER
-      RABBITMQ_DEFAULT_PASS: RMQ_PASS
+      - RABBITMQ_DEFAULT_USER=${RABBIT_MQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_MQ_DEFAULT_PASS}
+      - RABBITMQ_PORT=${RABBIT_MQ_PORT}
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 10s
       timeout: 30s
       retries: 3
+    networks:
+      - msrvs
 
 
   auth-service:
     depends_on:
       - auth-db
     ports:
-      - "3003:3003"
+      - "3001:3000"
     build:
       context: auth-service
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgres://auth:my-custom-secret@auth-db:5432/auth-db?schema=public"
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+    networks:
+      - msrvs
 
 networks:
   msrvs:
