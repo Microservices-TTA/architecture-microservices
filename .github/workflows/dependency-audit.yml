@@ -1,0 +1,23 @@
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: "The name of the service"
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: dependencies audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies for ${{ inputs.service-name }}
+        working-directory: ${{ inputs.service-name }}
+        run: npm install
+
+      - name: dependencies audit
+        working-directory: ${{ inputs.service-name }}
+        run: npm audit --audit-level=high
