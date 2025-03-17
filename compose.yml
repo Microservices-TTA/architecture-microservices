@@ -1,0 +1,117 @@
+services:
+  orders-db:
+    image: mongo
+    restart: always
+    healthcheck:
+      test:  echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${ORDERS_MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${ORDERS_MONGO_INITDB_ROOT_PASSWORD}
+#    volumes:
+#      - './.data/orders-data:/data/db'
+    ports:
+      - "27018:27017"
+    networks:
+      - msrvs
+
+  orders-service:
+    build:
+      context: orders-service
+      dockerfile: Dockerfile
+    depends_on:
+      orders-db:
+        condition: service_healthy
+    volumes:
+      - "./orders-service:/app"
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://root:pass@orders-db:27017/orders-db?authSource=admin
+    ports:
+      - "3002:3000"
+    networks:
+      - msrvs
+
+  gateway-service:
+    depends_on:
+      message-broker:
+        condition: service_healthy
+        restart: true
+    build:
+      context: gateway-service
+      dockerfile: Dockerfile
+#    volumes:
+#      - './gateway-service:/app'
+    environment:
+      - PORT=${GATEWAY_SERVICE_PORT}
+      - ORDER_SERVICE_URL=http://orders-service:3000
+      - AUTH_SERVICE_URL=http://auth-service:3000
+      - AMQP_URL=amqp://${RABBIT_MQ_DEFAULT_USER}:${RABBIT_MQ_DEFAULT_PASS}@message-broker:${RABBIT_MQ_PORT}
+    ports:
+      - "3000:${GATEWAY_SERVICE_PORT}"
+    networks:
+      - msrvs
+
+  auth-db:
+    image: postgres:10-alpine
+    ports:
+      - "5432:5432"
+#    volumes:
+#      - './.data/auth-data:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_USER=${AUTH_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${AUTH_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${AUTH_POSTGRES_DB}
+    networks:
+      - msrvs
+
+  auth-admin:
+    image: adminer
+    restart: always
+    ports:
+      - "8888:8080"
+    networks:
+      - msrvs
+
+  message-broker:
+    depends_on:
+      - auth-db
+      - orders-db
+    image: rabbitmq:3-alpine
+    restart: always
+    hostname: message-broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBIT_MQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_MQ_DEFAULT_PASS}
+      - RABBITMQ_PORT=${RABBIT_MQ_PORT}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    networks:
+      - msrvs
+
+
+  auth-service:
+    depends_on:
+      - auth-db
+    ports:
+      - "3001:3000"
+    build:
+      context: auth-service
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+    networks:
+      - msrvs
+
+networks:
+  msrvs:
+    driver: bridge

@@ -1,0 +1,99 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [main, test]
+
+jobs:
+  orders-audit:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/dependency-audit.yml
+    with:
+      service-name: orders-service
+
+  gateway-audit:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/dependency-audit.yml
+    with:
+      service-name: gateway-service
+
+  auth-audit:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/dependency-audit.yml
+    with:
+      service-name: auth-service
+
+  orders-build:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/build.yml
+    needs: orders-audit
+    with:
+      service-name: orders-service
+
+  gateway-build:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/build.yml
+    needs: gateway-audit
+    with:
+      service-name: gateway-service
+
+  auth-build:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/build.yml
+    needs: auth-audit
+    with:
+      service-name: auth-service
+
+  orders-test:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/test.yml
+    needs: orders-build
+    with:
+      service-name: orders-service
+
+  auth-test:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/test.yml
+    needs: auth-build
+    with:
+      service-name: auth-service
+
+  gateway-test:
+    if: github.event.pull_request.base.ref != 'main'
+    uses: ./.github/workflows/test.yml
+    needs: gateway-build
+    with:
+      service-name: gateway-service
+
+  orders-deploy:
+    uses: ./.github/workflows/deploy.yml
+    if: github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      packages: write
+    with:
+      service-name: orders-service
+      image-tag: latest
+      image-name: orders-service
+
+  gateway-deploy:
+    uses: ./.github/workflows/deploy.yml
+    if: github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      packages: write
+    with:
+      service-name: gateway-service
+      image-tag: latest
+      image-name: gateway-service
+
+  auth-deploy:
+    uses: ./.github/workflows/deploy.yml
+    if: github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      packages: write
+    with:
+      service-name: auth-service
+      image-tag: latest
+      image-name: auth-service

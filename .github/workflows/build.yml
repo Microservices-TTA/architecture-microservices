@@ -1,0 +1,35 @@
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: "The name of the service"
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install dependencies for ${{ inputs.service-name }}
+        working-directory: ${{ inputs.service-name }}
+        run: npm install
+
+      - name: Build ${{ inputs.service-name }}
+        working-directory: ${{ inputs.service-name }}
+        run: npm run build
+
+      - name: Cache Node.js modules
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ inputs.service-name }}/node_modules
+            ${{ inputs.service-name }}/.cache
+          key: node-${{ hashFiles('**/package-lock.json') }}
