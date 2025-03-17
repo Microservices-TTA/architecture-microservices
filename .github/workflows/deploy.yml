@@ -34,4 +34,4 @@ jobs:
         with:
           context: ./${{ inputs.service-name }}
           push: true
-          tags: ghcr.io/Microservices-TTA/architecture-microservices/${{ inputs.image-name }}:${{ inputs.image-tag }}
+          tags: ghcr.io/microservices-tta/architecture-microservices/${{ inputs.image-name }}:${{ inputs.image-tag }}
