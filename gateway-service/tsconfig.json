@@ -2,12 +2,14 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
+    "types": ["jest"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["dom", "es6"],
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.test.ts"]
 }
