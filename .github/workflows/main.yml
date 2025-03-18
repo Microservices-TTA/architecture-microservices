@@ -5,6 +5,17 @@ on:
     branches: [main, test]
 
 jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   orders-audit:
     if: github.event.pull_request.base.ref != 'main'
     uses: ./.github/workflows/dependency-audit.yml
