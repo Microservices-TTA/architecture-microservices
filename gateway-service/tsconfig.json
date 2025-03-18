@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "rootDir": ".",
     "outDir": "./dist",
     "types": ["jest"],
     "esModuleInterop": true,
@@ -10,6 +9,5 @@
     "lib": ["dom", "es6"],
     "strict": true,
     "skipLibCheck": true
-  },
-  "include": ["src/**/*.ts", "tests/**/*.test.ts"]
+  }
 }
