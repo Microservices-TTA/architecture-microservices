@@ -3,6 +3,7 @@
     "target": "esnext",
     "module": "commonjs",
     "outDir": "./dist",
+    "rootDir": "./src",
     "types": ["jest"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
