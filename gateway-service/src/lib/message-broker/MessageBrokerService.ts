@@ -66,7 +66,7 @@ export class AMQPService {
 }
 
 export class AMQPServiceAsync {
-    connection?: amqpAsync.Connection;
+    connection?: Awaited<ReturnType<typeof amqpAsync.connect>>;
 
     async connect() {
         this.connection = await amqpAsync.connect(process.env.AMQP_URL!)
