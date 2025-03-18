@@ -15,7 +15,7 @@ app.use(express.json())
 const PORT = process.env.PORT;
 
 app.get("/", (request: Request, response: Response) => {
-    response.status(200).send("Hello World from dev");
+    response.status(200).send("Hello World again");
 });
 
 app.use("/orders", OrdersRouter);
